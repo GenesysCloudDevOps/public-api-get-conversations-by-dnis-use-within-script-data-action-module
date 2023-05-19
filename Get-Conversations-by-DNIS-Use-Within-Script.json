@@ -1,0 +1,70 @@
+{
+  "name": "Get Conversations by DNIS",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/analytics/conversations/details/query",
+      "requestType": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "requestTemplate": "{\r\n \"interval\": \"${input.Date}\",\r\n \"order\": \"asc\",\r\n \"orderBy\": \"conversationStart\",\r\n \"paging\": {\r\n  \"pageSize\": 25,\r\n  \"pageNumber\": 1\r\n },\r\n \"segmentFilters\": [\r\n  {\r\n   \"type\": \"and\",\r\n   \"predicates\": [\r\n    {\r\n     \"type\": \"dimension\",\r\n     \"dimension\": \"dnis\",\r\n     \"operator\": \"matches\",\r\n     \"value\": \"${input.DNIS}\"\r\n    }\r\n   ]\r\n  }\r\n ]\r\n}"
+    },
+    "response": {
+      "translationMap": {
+        "InteractionIds": "$.conversations[*].conversationId"
+      },
+      "translationMapDefaults": {
+        "InteractionIds": "[\r\n  \"\"\r\n]"
+      },
+      "successTemplate": "{\"InteractionIds\": ${InteractionIds}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "Check for interactions with DNIS",
+        "description": "Check if we had interactions for a certain DNIS",
+        "type": "object",
+        "required": [
+          "DNIS",
+          "Date"
+        ],
+        "properties": {
+          "DNIS": {
+            "description": "DNIS in e.164 format",
+            "type": "string"
+          },
+          "Date": {
+            "description": "Date in the format YYYY-MM-DDThh:mm:ss/YYYY-MM-DDThh:mm:ss (yesterday/today+1 for example, a query that does not exceed 31 days)",
+            "type": "string",
+            "format": "YYYY-MM-DDThh:mm:ss/YYYY-MM-DDThh:mm:ss"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "Check for interactions with DNIS",
+        "description": "Returns the Interaction IDs",
+        "type": "object",
+        "properties": {
+          "InteractionIds": {
+            "description": "The Interaction ID(s) that contain the DNIS you looked up",
+            "type": "array",
+            "items": {
+              "title": "Interaction ID",
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
